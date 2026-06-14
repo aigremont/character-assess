@@ -6,15 +6,11 @@ sys.path.insert(0, os.path.dirname(__file__))
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
-from app import app
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
-from werkzeug.wrappers import Response
+# Tell Flask the sub-path prefix so url_for() generates correct links.
+# Passenger strips the prefix before passing requests to us, so Flask
+# just needs to know to include it when building URLs.
+script_name = os.environ.get('APPLICATION_ROOT', '/')
+if script_name != '/':
+    os.environ['SCRIPT_NAME'] = script_name
 
-app_root = os.environ.get('APPLICATION_ROOT', '/')
-if app_root != '/':
-    application = DispatcherMiddleware(
-        Response('Not Found', status=404),
-        {app_root: app}
-    )
-else:
-    application = app
+from app import app as application
