@@ -54,24 +54,7 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 
 ---
 
-## 4. Local Development
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the app
-python app.py
-```
-
-Visit http://localhost:5000
-
-> **Note**: For local OAuth to work, temporarily add `http://localhost:5000/auth/callback`
-> as a redirect URL in your Bungie app settings, and set `APP_BASE_URL=http://localhost:5000` in `.env`.
-
----
-
-## 5. cPanel Deployment
+## 3. cPanel Deployment
 
 ### Upload Files
 
@@ -120,7 +103,7 @@ In the cPanel Python App interface, click **Restart** after making changes.
 
 ---
 
-## 6. Bungie Redirect URL
+## 4. Bungie Redirect URL
 
 Make sure the redirect URL registered in your Bungie app exactly matches:
 
