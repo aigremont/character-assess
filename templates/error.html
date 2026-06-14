@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error - Destiny 2 Progression Assessor</title>
+    <title>Error – Destiny 2 Progression Assessor</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0f;
-            color: #c8c8c8;
-            margin: 0;
+            background: #0a0e1a;
+            color: #c8d0e0;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -17,45 +17,64 @@
         }
         .container {
             text-align: center;
-            max-width: 500px;
-            padding: 2rem;
+            max-width: 540px;
+            padding: 40px 20px;
         }
-        .error-icon { font-size: 3rem; margin-bottom: 1rem; }
-        h1 { color: #e05050; }
-        .error-message {
-            background: #1a0a0a;
-            border: 1px solid #3a1a1a;
-            border-radius: 8px;
-            padding: 1.2rem;
-            margin: 1.5rem 0;
-            color: #e08080;
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #c04040;
+            font-size: 1.6rem;
+            margin-bottom: 16px;
+        }
+        .message {
+            background: #1a0f0f;
+            border: 1px solid #4a1a1a;
+            border-radius: 6px;
+            padding: 16px 20px;
+            color: #c08080;
+            font-family: monospace;
+            font-size: 0.95rem;
             text-align: left;
             word-break: break-word;
+            margin-bottom: 32px;
+            line-height: 1.5;
         }
         .btn {
             display: inline-block;
-            padding: 0.7rem 1.5rem;
-            background: #c8a050;
-            color: #0a0a0f;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #b89a4e, #8a6f2e);
+            color: #0a0e1a;
             text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            margin: 0.3rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin: 6px;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #d4b86a, #b89a4e);
         }
         .btn-secondary {
-            background: #1e1e2e;
-            color: #c8c8c8;
-            border: 1px solid #3a3a4a;
+            background: transparent;
+            color: #8090a8;
+            border: 1px solid #2a3a5a;
+        }
+        .btn-secondary:hover {
+            color: #b89a4e;
+            border-color: #b89a4e;
+            background: transparent;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="error-icon">⚠️</div>
+        <div class="error-icon">⚠</div>
         <h1>Something went wrong</h1>
-        <div class="error-message">{{ error }}</div>
+        <div class="message">{{ message }}</div>
         <a href="/" class="btn">Go Home</a>
-        <a href="/auth/start" class="btn btn-secondary">Try Login Again</a>
+        <a href="/logout" class="btn btn-secondary">Logout &amp; Retry</a>
     </div>
 </body>
 </html>
