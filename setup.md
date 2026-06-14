@@ -1,117 +1,83 @@
 # Destiny 2 Progression Assessor – Setup Guide
 
-## Prerequisites
+## What you need
 
-- Python 3.11+
-- A Bungie.net developer account
-- A Claude Pro account at claude.ai (free to use — no API key needed)
-- A web host with cPanel (for production) or any Python-capable server
+- A cPanel web hosting account (with Python app support)
+- A Bungie.net account
+- A Claude Pro account at claude.ai
 
 ---
 
 ## 1. Get a Bungie API Key
 
 1. Go to https://www.bungie.net/en/Application and sign in.
-2. Click **Create New App**.
-3. Fill in the form:
-   - **Application Name**: anything descriptive (e.g. "My D2 Assessor")
+2. Click **Create New App** and fill in the form:
+   - **Application Name**: anything (e.g. "My D2 Assessor")
    - **Website**: your domain (e.g. `https://yourdomain.com`)
-   - **Application Status**: Private (for personal use) or Public
    - **OAuth Client Type**: **Confidential**
    - **Redirect URL**: `https://yourdomain.com/auth/callback`
-     - For local dev: `http://localhost:5000/auth/callback`
-   - **Scope**: Check **Read your Destiny 2 information** (and any others you need)
+   - **Scope**: Check **Read your Destiny 2 information**
    - **Origin Header**: `https://yourdomain.com`
-4. Submit. You'll receive:
+3. Submit. Note down:
    - **API Key** → `BUNGIE_API_KEY`
    - **OAuth client_id** → `BUNGIE_CLIENT_ID`
    - **OAuth client_secret** → `BUNGIE_CLIENT_SECRET`
 
 ---
 
-## 2. Configure the App
+## 2. Upload the App to cPanel
 
-Copy `.env.example` to `.env` and fill in all values:
+1. Log in to cPanel and open **File Manager**.
+2. Navigate to the folder where you want to host the app (e.g. a subdomain folder).
+3. Upload all the project files — or use cPanel's **Git Version Control** to clone the repository directly on the server.
 
-```bash
-cp .env.example .env
-```
+---
 
-Edit `.env`:
+## 3. Set Up the Python App in cPanel
+
+1. In cPanel, go to **Software → Setup Python App**.
+2. Click **Create Application** and configure:
+   - **Python version**: 3.11 (or highest available)
+   - **Application root**: the folder you uploaded to
+   - **Application URL**: your domain or subdomain
+   - **Application startup file**: `passenger_wsgi.py`
+   - **Application Entry point**: `application`
+3. Click **Create**.
+4. In the app interface, find the **pip install** / requirements section and point it at `requirements.txt`. cPanel will install the dependencies on the server.
+
+---
+
+## 4. Create the .env File
+
+In cPanel **File Manager**, open the application folder and create a new file called `.env`. You can copy the contents of `.env.example` as a starting point, then fill in your real values:
 
 ```
 BUNGIE_API_KEY=your_actual_api_key
 BUNGIE_CLIENT_ID=your_actual_client_id
 BUNGIE_CLIENT_SECRET=your_actual_client_secret
-FLASK_SECRET_KEY=some_long_random_string_here
+FLASK_SECRET_KEY=any_long_random_string
 APP_BASE_URL=https://yourdomain.com
 ```
 
-Generate a secure `FLASK_SECRET_KEY` with:
-```bash
-python3 -c "import secrets; print(secrets.token_hex(32))"
-```
+For `FLASK_SECRET_KEY`, just type a long random string of letters and numbers — it only needs to be unguessable.
 
 ---
 
-## 3. cPanel Deployment
+## 5. Restart the App
 
-### Upload Files
-
-1. In cPanel, open **File Manager** and navigate to your domain's root (e.g. `public_html`) or a subdirectory.
-2. Upload all project files, or use FTP/SFTP.
-
-Alternatively, use Git:
-```bash
-git clone <your-repo-url> /home/yourusername/character-assess
-```
-
-### Set Up Python App in cPanel
-
-1. In cPanel, find **Setup Python App** (under Software).
-2. Click **Create Application**.
-3. Configure:
-   - **Python version**: 3.11 (or highest available)
-   - **Application root**: path to your uploaded folder (e.g. `/home/user/character-assess`)
-   - **Application URL**: your domain or subdomain
-   - **Application startup file**: `passenger_wsgi.py`
-   - **Application Entry point**: `application`
-4. Click **Create**.
-
-### Install Requirements
-
-In the cPanel Python App interface, there is a pip/requirements section, or you can run via the terminal:
-
-```bash
-source /home/yourusername/virtualenv/character-assess/3.11/bin/activate
-cd /home/yourusername/character-assess
-pip install -r requirements.txt
-```
-
-### Create .env File
-
-In File Manager or via SSH, create `.env` in the application root:
-
-```bash
-cp .env.example .env
-nano .env  # fill in real values
-```
-
-### Restart the App
-
-In the cPanel Python App interface, click **Restart** after making changes.
+Back in **Setup Python App**, click **Restart**. The app should now be live at your domain.
 
 ---
 
-## 4. Bungie Redirect URL
+## 6. Bungie Redirect URL
 
-Make sure the redirect URL registered in your Bungie app exactly matches:
+Make sure the redirect URL in your Bungie app settings exactly matches:
 
 ```
 https://yourdomain.com/auth/callback
 ```
 
-(No trailing slash, correct protocol.)
+No trailing slash, correct protocol. If these don't match, OAuth login will fail.
 
 ---
 
@@ -119,7 +85,7 @@ https://yourdomain.com/auth/callback
 
 | Problem | Solution |
 |---|---|
-| `ErrorCode` not 1 from Bungie API | Check your API key and OAuth credentials |
-| OAuth redirect mismatch | Ensure `APP_BASE_URL` in `.env` matches the redirect URL in Bungie app settings |
-| No Destiny 2 account found | User must have played Destiny 2 and have an active character |
-| 500 errors on cPanel | Check the error log in cPanel > Errors, or `stderr.log` in your app folder |
+| OAuth redirect mismatch | Check that `APP_BASE_URL` in `.env` matches the redirect URL in your Bungie app settings exactly |
+| `ErrorCode` not 1 from Bungie API | Check your `BUNGIE_API_KEY` is correct |
+| No Destiny 2 account found | Your Bungie account must have an active Destiny 2 character |
+| 500 errors | Check cPanel > Errors log, or `stderr.log` in your app folder |
