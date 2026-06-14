@@ -4,7 +4,7 @@
 
 - Python 3.11+
 - A Bungie.net developer account
-- An Anthropic API key
+- A Claude Pro account at claude.ai (free to use — no API key needed)
 - A web host with cPanel (for production) or any Python-capable server
 
 ---
@@ -29,15 +29,7 @@
 
 ---
 
-## 2. Get an Anthropic API Key
-
-1. Go to https://console.anthropic.com/ and sign in or create an account.
-2. Navigate to **API Keys** and create a new key.
-3. Copy the key → `ANTHROPIC_API_KEY`
-
----
-
-## 3. Configure the App
+## 2. Configure the App
 
 Copy `.env.example` to `.env` and fill in all values:
 
@@ -52,7 +44,6 @@ BUNGIE_API_KEY=your_actual_api_key
 BUNGIE_CLIENT_ID=your_actual_client_id
 BUNGIE_CLIENT_SECRET=your_actual_client_secret
 FLASK_SECRET_KEY=some_long_random_string_here
-ANTHROPIC_API_KEY=your_actual_anthropic_key
 APP_BASE_URL=https://yourdomain.com
 ```
 
@@ -148,5 +139,4 @@ https://yourdomain.com/auth/callback
 | `ErrorCode` not 1 from Bungie API | Check your API key and OAuth credentials |
 | OAuth redirect mismatch | Ensure `APP_BASE_URL` in `.env` matches the redirect URL in Bungie app settings |
 | No Destiny 2 account found | User must have played Destiny 2 and have an active character |
-| Claude API error | Check `ANTHROPIC_API_KEY` and account credit balance |
 | 500 errors on cPanel | Check the error log in cPanel > Errors, or `stderr.log` in your app folder |
