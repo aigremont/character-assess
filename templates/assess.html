@@ -3,45 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assessment – {{ display_name }}</title>
+    <title>Assessment - Destiny 2 Progression Assessor</title>
     <style>
-        body { font-family: sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; background: #111; color: #ccc; }
-        h1, h2, h3 { color: #fff; }
-        .characters { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 30px; }
-        .char-card { background: #1e1e1e; border: 1px solid #333; border-radius: 6px; padding: 14px 20px; min-width: 180px; }
-        .char-card .light { font-size: 1.4rem; font-weight: bold; color: #f0c040; }
-        .char-card .label { font-size: 0.85rem; color: #888; }
-        .assessment { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 24px; line-height: 1.7; }
-        .assessment h2 { border-bottom: 1px solid #333; padding-bottom: 6px; }
-        a { color: #4a90d9; }
-        .actions { margin-top: 24px; }
-        a.btn { display: inline-block; padding: 10px 20px; background: #4a90d9; color: #fff; text-decoration: none; border-radius: 4px; margin-right: 10px; }
-        a.btn.grey { background: #444; }
-        code { background: #222; padding: 2px 6px; border-radius: 3px; }
-        pre { background: #222; padding: 12px; border-radius: 4px; overflow-x: auto; }
-        ul, ol { padding-left: 1.4em; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #c8c8c8;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #2a2a3a;
+            padding-bottom: 1rem;
+        }
+        h1 {
+            color: #f5f0e8;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .nav-links a {
+            color: #c8a050;
+            text-decoration: none;
+            margin-left: 1rem;
+            font-size: 0.9rem;
+        }
+        .nav-links a:hover { text-decoration: underline; }
+
+        .characters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .character-card {
+            background: #12121a;
+            border: 1px solid #2a2a3a;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            flex: 1;
+            min-width: 160px;
+        }
+        .character-class {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f5f0e8;
+        }
+        .character-race {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .power-level {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #c8a050;
+            margin-top: 0.5rem;
+        }
+        .power-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .assessment-section {
+            background: #12121a;
+            border: 1px solid #2a2a3a;
+            border-radius: 8px;
+            padding: 2rem;
+        }
+        .assessment-section h2 {
+            color: #c8a050;
+            margin-top: 0;
+        }
+        .assessment-content h2 {
+            color: #c8a050;
+            border-bottom: 1px solid #2a2a3a;
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        .assessment-content h3 {
+            color: #e0d0b0;
+        }
+        .assessment-content ul, .assessment-content ol {
+            line-height: 1.8;
+        }
+        .assessment-content li {
+            margin-bottom: 0.25rem;
+        }
+        .assessment-content strong {
+            color: #f0e0c0;
+        }
+        .assessment-content code {
+            background: #1e1e2e;
+            padding: 0.1em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .loading-note {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.4rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+        .btn-primary { background: #c8a050; color: #0a0a0f; }
+        .btn-secondary { background: #1e1e2e; color: #c8c8c8; border: 1px solid #3a3a4a; }
     </style>
 </head>
 <body>
-    <h1>Assessment for {{ display_name }}</h1>
+    <div class="container">
+        <header>
+            <h1>⚔️ Guardian Assessment</h1>
+            <div class="nav-links">
+                <a href="/assess">Re-assess</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </header>
 
-    <div class="characters">
-        {% for c in characters %}
-        <div class="char-card">
-            <div class="label">{{ c.race }} {{ c.class }}</div>
-            <div class="light">{{ c.light }}</div>
-            <div class="label">Power Level</div>
+        <p style="color:#888; margin-bottom:1rem;">Showing assessment for: <strong style="color:#f5f0e8;">{{ display_name }}</strong></p>
+
+        <div class="characters">
+            {% for char in characters %}
+            <div class="character-card">
+                <div class="character-class">{{ char.class }}</div>
+                <div class="character-race">{{ char.race }}</div>
+                <div class="power-level">{{ char.light }}</div>
+                <div class="power-label">Power Level</div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
-    <div class="assessment">
-        {{ assessment_html | safe }}
-    </div>
+        <div class="assessment-section">
+            <h2>Claude's Assessment</h2>
+            <p class="loading-note">Generated by Claude AI based on your current character data.</p>
+            <div class="assessment-content">
+                {{ assessment_html | safe }}
+            </div>
+        </div>
 
-    <div class="actions">
-        <a class="btn" href="/assess">Re-assess</a>
-        <a class="btn grey" href="/logout">Logout</a>
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="/assess" class="btn btn-primary">Re-assess</a>
+            <a href="/" class="btn btn-secondary">Home</a>
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+        </div>
     </div>
 </body>
 </html>

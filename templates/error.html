@@ -2,17 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Error</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Destiny 2 Progression Assessor</title>
     <style>
-        body { font-family: sans-serif; max-width: 700px; margin: 60px auto; padding: 0 20px; background: #111; color: #ccc; }
-        h1 { color: #e05555; }
-        .msg { background: #1e1e1e; border: 1px solid #553333; border-radius: 6px; padding: 16px 20px; }
-        a { color: #4a90d9; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #c8c8c8;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 2rem;
+        }
+        .error-icon { font-size: 3rem; margin-bottom: 1rem; }
+        h1 { color: #e05050; }
+        .error-message {
+            background: #1a0a0a;
+            border: 1px solid #3a1a1a;
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            color: #e08080;
+            text-align: left;
+            word-break: break-word;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            background: #c8a050;
+            color: #0a0a0f;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 0.3rem;
+        }
+        .btn-secondary {
+            background: #1e1e2e;
+            color: #c8c8c8;
+            border: 1px solid #3a3a4a;
+        }
     </style>
 </head>
 <body>
-    <h1>Something went wrong</h1>
-    <div class="msg">{{ error }}</div>
-    <p><a href="/">Go back home</a></p>
+    <div class="container">
+        <div class="error-icon">⚠️</div>
+        <h1>Something went wrong</h1>
+        <div class="error-message">{{ error }}</div>
+        <a href="/" class="btn">Go Home</a>
+        <a href="/auth/start" class="btn btn-secondary">Try Login Again</a>
+    </div>
 </body>
 </html>
