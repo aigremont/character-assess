@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destiny 2 Progression Assessor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #c8c8c8;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        h1 {
+            color: #f5f0e8;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(200, 170, 100, 0.5);
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        .description {
+            background: #12121a;
+            border: 1px solid #2a2a3a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0.4rem;
+        }
+        .btn-primary {
+            background: #c8a050;
+            color: #0a0a0f;
+        }
+        .btn-primary:hover {
+            background: #e0b860;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #1e1e2e;
+            color: #c8c8c8;
+            border: 1px solid #3a3a4a;
+        }
+        .btn-secondary:hover {
+            background: #2a2a3a;
+        }
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">⚔️</div>
+        <h1>Destiny 2 Progression Assessor</h1>
+        <p class="subtitle">AI-powered character analysis for Guardians</p>
+
+        <div class="description">
+            <p>Connect your Bungie.net account to receive a personalized progression assessment powered by Claude AI.</p>
+            <p>This tool analyzes your:</p>
+            <ul>
+                <li>Character Power Levels</li>
+                <li>Gear loadout and weak slots</li>
+                <li>Recent activity history</li>
+                <li>Weekly milestones</li>
+            </ul>
+            <p>You'll get a prioritized action plan to maximize your progression.</p>
+        </div>
+
+        {% if logged_in %}
+            <a href="/assess" class="btn btn-primary">View My Assessment</a>
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+        {% else %}
+            <a href="/auth/start" class="btn btn-primary">Login with Bungie.net</a>
+        {% endif %}
+    </div>
+</body>
+</html>
