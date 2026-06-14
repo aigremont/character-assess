@@ -73,8 +73,8 @@
         <div class="error-icon">⚠</div>
         <h1>Something went wrong</h1>
         <div class="message">{{ message }}</div>
-        <a href="/" class="btn">Go Home</a>
-        <a href="/logout" class="btn btn-secondary">Logout &amp; Retry</a>
+        <a href="{{ url_for('index') }}" class="btn">Go Home</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout &amp; Retry</a>
     </div>
 </body>
 </html>

@@ -176,9 +176,9 @@
     <header>
         <h1>⚔ D2 Progression Assessor</h1>
         <div class="nav-links">
-            <a href="/assess">Re-assess</a>
-            <a href="/">Home</a>
-            <a href="/logout">Logout</a>
+            <a href="{{ url_for('assess') }}">Re-assess</a>
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     </header>
 
@@ -226,8 +226,8 @@
                 <a href="https://claude.ai" target="_blank" rel="noopener" class="btn">
                     Open claude.ai ↗
                 </a>
-                <a href="/assess" class="btn btn-secondary">Re-fetch Data</a>
-                <a href="/logout" class="btn btn-secondary">Logout</a>
+                <a href="{{ url_for('assess') }}" class="btn btn-secondary">Re-fetch Data</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
             </div>
         </div>
 
