@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Destiny 2 Progression Assessor</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0f;
-            color: #c8c8c8;
-            margin: 0;
-            padding: 0;
+            background: #0a0e1a;
+            color: #c8d0e0;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -19,85 +18,110 @@
         .container {
             text-align: center;
             max-width: 600px;
-            padding: 2rem;
+            padding: 40px 20px;
         }
         h1 {
-            color: #f5f0e8;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 20px rgba(200, 170, 100, 0.5);
+            font-size: 2.2rem;
+            color: #b89a4e;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(184,154,78,0.4);
         }
         .subtitle {
-            color: #888;
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-        }
-        .description {
-            background: #12121a;
-            border: 1px solid #2a2a3a;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            text-align: left;
+            font-size: 1.05rem;
+            color: #8090a8;
+            margin-bottom: 40px;
             line-height: 1.6;
         }
         .btn {
             display: inline-block;
-            padding: 0.9rem 2rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 14px 36px;
+            background: linear-gradient(135deg, #b89a4e, #8a6f2e);
+            color: #0a0e1a;
             text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin: 0.4rem;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            margin: 8px;
         }
-        .btn-primary {
-            background: #c8a050;
-            color: #0a0a0f;
-        }
-        .btn-primary:hover {
-            background: #e0b860;
+        .btn:hover {
+            background: linear-gradient(135deg, #d4b86a, #b89a4e);
             transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(184,154,78,0.4);
         }
         .btn-secondary {
-            background: #1e1e2e;
-            color: #c8c8c8;
-            border: 1px solid #3a3a4a;
+            background: linear-gradient(135deg, #2a3a5a, #1a2a40);
+            color: #b89a4e;
+            border: 1px solid #b89a4e;
         }
         .btn-secondary:hover {
-            background: #2a2a3a;
+            background: linear-gradient(135deg, #3a4a6a, #2a3a5a);
         }
-        .logo {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+        .features {
+            margin: 40px 0;
+            text-align: left;
         }
+        .features h2 {
+            color: #b89a4e;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            padding: 8px 0;
+            color: #8090a8;
+            border-bottom: 1px solid #1a2a40;
+        }
+        .features li::before {
+            content: '▸ ';
+            color: #b89a4e;
+        }
+        .logged-in-msg {
+            background: #0f1a2e;
+            border: 1px solid #b89a4e;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .logged-in-msg p { color: #8090a8; margin-bottom: 12px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">⚔️</div>
-        <h1>Destiny 2 Progression Assessor</h1>
-        <p class="subtitle">AI-powered character analysis for Guardians</p>
-
-        <div class="description">
-            <p>Connect your Bungie.net account to receive a personalized progression assessment powered by Claude AI.</p>
-            <p>This tool analyzes your:</p>
-            <ul>
-                <li>Character Power Levels</li>
-                <li>Gear loadout and weak slots</li>
-                <li>Recent activity history</li>
-                <li>Weekly milestones</li>
-            </ul>
-            <p>You'll get a prioritized action plan to maximize your progression.</p>
-        </div>
+        <h1>⚔ Destiny 2<br>Progression Assessor</h1>
+        <p class="subtitle">
+            Connect your Bungie.net account and get an AI-powered analysis of your
+            Destiny 2 characters — including power level recommendations, activity
+            priorities, and a personalized "what to do next" plan.
+        </p>
 
         {% if logged_in %}
-            <a href="/assess" class="btn btn-primary">View My Assessment</a>
+        <div class="logged-in-msg">
+            <p>You are already authenticated with Bungie.net.</p>
+            <a href="/assess" class="btn">View My Assessment</a>
             <a href="/logout" class="btn btn-secondary">Logout</a>
+        </div>
         {% else %}
-            <a href="/auth/start" class="btn btn-primary">Login with Bungie.net</a>
+        <a href="/auth/start" class="btn">Login with Bungie.net</a>
         {% endif %}
+
+        <div class="features">
+            <h2>What you get</h2>
+            <ul>
+                <li>Power level analysis for all characters</li>
+                <li>Gear slot upgrade recommendations</li>
+                <li>Activity priority list (raids, dungeons, strikes)</li>
+                <li>Weekly milestone checklist</li>
+                <li>Prioritized action plan for maximum progression</li>
+                <li>Build suggestions based on your class</li>
+            </ul>
+        </div>
     </div>
 </body>
 </html>

@@ -1,32 +1,33 @@
-# app.py
 import os
-from flask import Flask, render_template, redirect, request, session, url_for
+from flask import Flask, redirect, request, session, url_for, render_template
 from dotenv import load_dotenv
+from bungie import BungieClient
+from claude_assess import assess_character
 
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key')
-
-from bungie import BungieClient
-from claude_assess import assess_character
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-change-me')
 
 bungie = BungieClient()
+
 
 @app.route('/')
 def index():
     logged_in = 'access_token' in session
     return render_template('index.html', logged_in=logged_in)
 
+
 @app.route('/auth/start')
 def auth_start():
     return redirect(bungie.get_auth_url())
+
 
 @app.route('/auth/callback')
 def auth_callback():
     code = request.args.get('code')
     if not code:
-        return render_template('error.html', error="No authorization code received from Bungie.")
+        return render_template('error.html', message='No authorization code received from Bungie.')
     try:
         token_data = bungie.exchange_code(code)
         session['access_token'] = token_data['access_token']
@@ -34,7 +35,8 @@ def auth_callback():
         session['membership_id'] = token_data.get('membership_id', '')
         return redirect(url_for('assess'))
     except Exception as e:
-        return render_template('error.html', error=f"Authentication failed: {str(e)}")
+        return render_template('error.html', message=f'Token exchange failed: {str(e)}')
+
 
 @app.route('/assess')
 def assess():
@@ -43,73 +45,76 @@ def assess():
     try:
         access_token = session['access_token']
         memberships = bungie.get_memberships(access_token)
-
-        # Find primary membership (not BungieNext/254)
-        primary = None
-        for m in memberships.get('destinyMemberships', []):
-            if m.get('membershipType') != 254:
-                primary = m
-                break
-
-        if not primary:
-            return render_template('error.html', error="No Destiny 2 membership found.")
-
+        # Find primary destiny membership (not BungieNext=254)
+        destiny_memberships = [
+            m for m in memberships.get('destinyMemberships', [])
+            if m.get('membershipType') != 254
+        ]
+        if not destiny_memberships:
+            return render_template('error.html', message='No Destiny 2 account found.')
+        # Prefer the primary membership
+        primary = next(
+            (m for m in destiny_memberships if m.get('crossSaveOverride') == m.get('membershipType')),
+            destiny_memberships[0]
+        )
         membership_type = primary['membershipType']
         membership_id = primary['membershipId']
         display_name = primary.get('displayName', 'Guardian')
 
-        # Get character data
         profile_data = bungie.get_characters(access_token, membership_type, membership_id)
+        characters_data = profile_data.get('Response', {}).get('characters', {}).get('data', {})
 
-        # Get activity history for each character
-        characters = profile_data.get('Response', {}).get('characters', {}).get('data', {})
         activity_histories = {}
-        for char_id in characters:
+        for char_id in characters_data:
             try:
-                activities = bungie.get_activity_history(access_token, membership_type, membership_id, char_id)
-                activity_histories[char_id] = activities
+                history = bungie.get_activity_history(access_token, membership_type, membership_id, char_id)
+                activity_histories[char_id] = history
             except Exception:
                 activity_histories[char_id] = {}
 
-        combined_data = {
+        full_data = {
             'profile': profile_data.get('Response', {}),
             'activity_histories': activity_histories,
             'display_name': display_name,
+            'membership_type': membership_type,
+            'membership_id': membership_id,
         }
 
-        assessment_md = assess_character(combined_data)
+        assessment_text = assess_character(full_data)
 
-        # Build character summary for template
-        char_summaries = []
-        for char_id, char in characters.items():
-            char_summaries.append({
+        # Build character summaries for display
+        characters = []
+        char_component = profile_data.get('Response', {}).get('characters', {}).get('data', {})
+        class_map = {0: 'Titan', 1: 'Hunter', 2: 'Warlock'}
+        race_map = {0: 'Human', 1: 'Awoken', 2: 'Exo'}
+        gender_map = {0: 'Male', 1: 'Female'}
+        for char_id, char in char_component.items():
+            characters.append({
                 'id': char_id,
-                'class': _class_name(char.get('classType', 0)),
-                'race': _race_name(char.get('raceType', 0)),
+                'class': class_map.get(char.get('classType', -1), 'Unknown'),
+                'race': race_map.get(char.get('raceType', -1), 'Unknown'),
+                'gender': gender_map.get(char.get('genderType', -1), 'Unknown'),
                 'light': char.get('light', 0),
                 'emblem': char.get('emblemBackgroundPath', ''),
+                'minutes_played': char.get('minutesPlayedTotal', 0),
             })
 
         import markdown as md
-        assessment_html = md.markdown(assessment_md)
+        assessment_html = md.markdown(assessment_text, extensions=['extra', 'nl2br'])
 
         return render_template('assess.html',
-                               display_name=display_name,
-                               characters=char_summaries,
-                               assessment_html=assessment_html)
+                               characters=characters,
+                               assessment_html=assessment_html,
+                               display_name=display_name)
     except Exception as e:
-        return render_template('error.html', error=f"Failed to fetch data: {str(e)}")
+        return render_template('error.html', message=f'Assessment failed: {str(e)}')
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-def _class_name(class_type):
-    return {0: 'Titan', 1: 'Hunter', 2: 'Warlock'}.get(class_type, 'Unknown')
-
-def _race_name(race_type):
-    return {0: 'Human', 1: 'Awoken', 2: 'Exo'}.get(race_type, 'Unknown')
 
 if __name__ == '__main__':
     app.run(debug=True)

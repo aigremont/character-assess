@@ -1,7 +1,7 @@
-# claude_assess.py
 import os
 import json
 import anthropic
+
 
 def assess_character(character_data: dict) -> str:
     client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
@@ -12,113 +12,99 @@ def assess_character(character_data: dict) -> str:
 
     characters = profile.get('characters', {}).get('data', {})
     char_progressions = profile.get('characterProgressions', {}).get('data', {})
-    char_inventories = profile.get('characterInventories', {}).get('data', {})
+    char_activities = profile.get('characterActivities', {}).get('data', {})
     item_instances = profile.get('itemComponents', {}).get('instances', {}).get('data', {})
-    milestones = profile.get('characterProgressions', {}).get('data', {})
+    char_inventories = profile.get('characterInventories', {}).get('data', {})
 
-    # Build a summarized data structure to keep prompt size reasonable
-    char_summaries = []
+    class_map = {0: 'Titan', 1: 'Hunter', 2: 'Warlock'}
+
+    summary_parts = []
+    summary_parts.append(f"Player: {display_name}\n")
+
     for char_id, char in characters.items():
-        class_map = {0: 'Titan', 1: 'Hunter', 2: 'Warlock'}
-        race_map = {0: 'Human', 1: 'Awoken', 2: 'Exo'}
+        class_name = class_map.get(char.get('classType', -1), 'Unknown')
+        light = char.get('light', 0)
+        minutes = char.get('minutesPlayedTotal', 0)
+        summary_parts.append(
+            f"\nCharacter: {class_name} | Power Level: {light} | "
+            f"Total Playtime: {int(minutes)//60}h {int(minutes)%60}m"
+        )
 
-        summary = {
-            'character_id': char_id,
-            'class': class_map.get(char.get('classType', 0), 'Unknown'),
-            'race': race_map.get(char.get('raceType', 0), 'Unknown'),
-            'light_level': char.get('light', 0),
-            'minutes_played': char.get('minutesPlayedTotal', 0),
-        }
+        # Progressions / milestones
+        progressions = char_progressions.get(char_id, {})
+        milestones = progressions.get('milestones', {})
+        if milestones:
+            milestone_list = []
+            for ms_hash, ms_data in list(milestones.items())[:15]:
+                milestone_list.append(f"  - Milestone {ms_hash}: {json.dumps(ms_data)[:200]}")
+            summary_parts.append("  Active Milestones (sample):\n" + "\n".join(milestone_list))
 
-        # Add milestone data if available
-        char_prog = char_progressions.get(char_id, {})
-        ms_data = char_prog.get('milestones', {})
-        milestone_list = []
-        for ms_hash, ms in list(ms_data.items())[:10]:  # limit to 10
-            milestone_list.append({
-                'hash': ms_hash,
-                'completed': ms.get('endDate', None) is not None,
-                'activities': [a.get('activityHash') for a in ms.get('activities', [])],
-            })
-        summary['milestones'] = milestone_list
+        # Recent activities
+        history = activity_histories.get(char_id, {})
+        activities = history.get('activities', [])
+        if activities:
+            summary_parts.append(f"  Recent Activities ({len(activities)} shown):")
+            for act in activities[:10]:
+                details = act.get('activityDetails', {})
+                values = act.get('values', {})
+                completed = values.get('completed', {}).get('basic', {}).get('value', 0)
+                kills = values.get('kills', {}).get('basic', {}).get('displayValue', '?')
+                summary_parts.append(
+                    f"    - Mode {details.get('mode', '?')} | "
+                    f"Completed: {bool(completed)} | Kills: {kills} | "
+                    f"Director: {details.get('directorActivityHash', '?')}"
+                )
 
-        # Add recent activities
-        acts = activity_histories.get(char_id, {})
-        recent = []
-        for act in acts.get('activities', [])[:10]:
-            values = act.get('values', {})
-            recent.append({
-                'activityHash': act.get('activityDetails', {}).get('referenceId'),
-                'mode': act.get('activityDetails', {}).get('mode'),
-                'completed': values.get('completed', {}).get('basic', {}).get('value', 0),
-                'deaths': values.get('deaths', {}).get('basic', {}).get('value', 0),
-                'kills': values.get('kills', {}).get('basic', {}).get('value', 0),
-                'period': act.get('period', ''),
-            })
-        summary['recent_activities'] = recent
+        # Character inventory item power levels (sample)
+        inventory = char_inventories.get(char_id, {})
+        items = inventory.get('items', [])
+        if items and item_instances:
+            powered_items = []
+            for item in items[:20]:
+                inst_id = item.get('itemInstanceId')
+                if inst_id and inst_id in item_instances:
+                    inst = item_instances[inst_id]
+                    pwr = inst.get('primaryStat', {}).get('value', 0)
+                    if pwr > 0:
+                        powered_items.append(f"    - Item hash {item.get('itemHash')}: Power {pwr}")
+            if powered_items:
+                summary_parts.append("  Equipped/Inventory Item Power Levels (sample):")
+                summary_parts.extend(powered_items[:10])
 
-        # Add equipped items (inventory)
-        inv = char_inventories.get(char_id, {})
-        equipped_items = []
-        for item in inv.get('items', [])[:20]:
-            item_instance_id = item.get('itemInstanceId')
-            instance_data = item_instances.get(item_instance_id, {}) if item_instance_id else {}
-            equipped_items.append({
-                'itemHash': item.get('itemHash'),
-                'bucketHash': item.get('bucketHash'),
-                'primaryStat': instance_data.get('primaryStat', {}),
-                'itemLevel': instance_data.get('itemLevel', 0),
-                'quality': instance_data.get('quality', 0),
-            })
-        summary['inventory_sample'] = equipped_items
+    data_summary = "\n".join(summary_parts)
 
-        char_summaries.append(summary)
+    prompt = f"""You are an expert Destiny 2 progression advisor. Below is data pulled from the Bungie API for a player's account. Analyze it and provide a thorough, actionable assessment.
 
-    data_json = json.dumps(char_summaries, indent=2)
+=== PLAYER DATA ===
+{data_summary}
 
-    prompt = f"""You are a Destiny 2 expert advisor. Below is character data for the Guardian "{display_name}".
+=== YOUR TASK ===
+Based on this data, provide a detailed assessment in Markdown format covering:
 
-The data includes:
-- Character class, race, and current Power/Light level
-- Recent activity history (last 10 activities per character)
-- Milestone data (weekly/daily objectives)
-- A sample of inventory items with their power levels
+1. **Power Level Analysis** - Current power level for each character, how close they are to the soft cap, hard cap, and pinnacle cap. What activities are most efficient for increasing power.
 
-Character Data:
-```json
-{data_json}
-```
+2. **Gear Slot Assessment** - Based on the item power levels shown, identify which gear slots are likely dragging down the average and should be prioritized for upgrades.
 
-Please provide a detailed progression assessment in Markdown format covering:
+3. **Activity Recommendations** - Specific activities to run:
+   - If below soft cap (~1900): Focus on world drops, story missions, patrol zones
+   - If at soft cap: Run Nightfalls, Crucible, Gambit for powerful rewards
+   - If near hard cap (~1960): Focus on pinnacle reward sources (raids, dungeons, weekly challenges)
+   - Raids to consider: Last Wish, Garden of Salvation, Deep Stone Crypt, Vault of Glass, King's Fall, Root of Nightmares, Crota's End, Salvation's Edge
+   - Dungeons: Prophecy, Grasp of Avarice, Duality, Spire of the Watcher, Ghosts of the Deep, Warlord's Ruin
 
-## 1. Current Status
-- Summary of each character and their Power level
-- Overall Guardian progression stage (early/mid/late game)
+4. **Milestone Priorities** - Which weekly milestones are worth completing for pinnacle/powerful gear drops.
 
-## 2. Power Level Analysis
-- Current power level assessment
-- What activities to focus on to increase Power level efficiently
-- Gap between current level and the current soft/power/pinnacle caps (if determinable)
+5. **Prioritized "What To Do Next" List** - A numbered, prioritized action list the player should follow this week to make the most progression gains.
 
-## 3. Gear Slot Recommendations
-- Based on inventory data, identify likely weak gear slots
-- Suggest priority slots to upgrade first
+6. **Build Suggestions** - Based on the character class and current progression level, briefly suggest what type of build or subclass to focus on.
 
-## 4. Activity Recommendations
-- Specific activities to run based on current progression (raids, dungeons, Nightfalls, story missions, etc.)
-- Weekly activities worth prioritizing
-- Any milestones that appear worth completing
-
-## 5. Prioritized "What To Do Next" List
-A numbered list of the top 5-7 actions the Guardian should take, in priority order.
-
-Keep the assessment practical, specific to what the data shows, and actionable. If certain data is missing or unclear, make reasonable assumptions based on power level."""
+Be specific and actionable. Use the actual power numbers from the data. If data is limited, provide general advice based on what's visible."""
 
     message = client.messages.create(
-        model="claude-sonnet-4-6",
+        model='claude-sonnet-4-6',
         max_tokens=2048,
         messages=[
-            {"role": "user", "content": prompt}
+            {'role': 'user', 'content': prompt}
         ]
     )
 
