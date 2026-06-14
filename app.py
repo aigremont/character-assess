@@ -2,7 +2,7 @@ import os
 from flask import Flask, redirect, request, session, url_for, render_template
 from dotenv import load_dotenv
 from bungie import BungieClient
-from claude_assess import assess_character
+from build_prompt import build_prompt
 
 load_dotenv()
 
@@ -80,7 +80,7 @@ def assess():
             'membership_id': membership_id,
         }
 
-        assessment_text = assess_character(full_data)
+        prompt = build_prompt(full_data)
 
         # Build character summaries for display
         characters = []
@@ -99,12 +99,9 @@ def assess():
                 'minutes_played': char.get('minutesPlayedTotal', 0),
             })
 
-        import markdown as md
-        assessment_html = md.markdown(assessment_text, extensions=['extra', 'nl2br'])
-
         return render_template('assess.html',
                                characters=characters,
-                               assessment_html=assessment_html,
+                               prompt=prompt,
                                display_name=display_name)
     except Exception as e:
         return render_template('error.html', message=f'Assessment failed: {str(e)}')

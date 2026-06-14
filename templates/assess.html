@@ -201,16 +201,48 @@
         </div>
 
         <div class="assessment-section">
-            <h2>AI Progression Assessment</h2>
-            <div class="assessment-content">
-                {{ assessment_html | safe }}
+            <h2>Your Claude Prompt</h2>
+            <p style="color:#8090a8; margin-bottom:16px; font-size:0.95rem;">
+                Copy the prompt below and paste it into
+                <a href="https://claude.ai" target="_blank" rel="noopener" style="color:#b89a4e;">claude.ai</a>
+                to get your personalised progression assessment.
+            </p>
+            <div style="position:relative;">
+                <textarea id="prompt-box" readonly rows="20" style="
+                    width:100%; background:#060c18; color:#8cb4d4;
+                    border:1px solid #1e2e48; border-radius:4px;
+                    padding:16px; font-family:monospace; font-size:0.85rem;
+                    line-height:1.6; resize:vertical;
+                ">{{ prompt }}</textarea>
+                <button onclick="copyPrompt()" id="copy-btn" style="
+                    position:absolute; top:10px; right:10px;
+                    background:linear-gradient(135deg,#b89a4e,#8a6f2e);
+                    color:#0a0e1a; border:none; border-radius:4px;
+                    padding:8px 16px; font-weight:bold; cursor:pointer;
+                    font-size:0.85rem;
+                ">Copy</button>
+            </div>
+            <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                <a href="https://claude.ai" target="_blank" rel="noopener" class="btn">
+                    Open claude.ai ↗
+                </a>
+                <a href="/assess" class="btn btn-secondary">Re-fetch Data</a>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
             </div>
         </div>
 
-        <div class="action-bar">
-            <a href="/assess" class="btn">Re-assess</a>
-            <a href="/logout" class="btn btn-secondary">Logout</a>
-        </div>
+        <script>
+        function copyPrompt() {
+            const box = document.getElementById('prompt-box');
+            box.select();
+            box.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(box.value).then(function() {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            });
+        }
+        </script>
     </div>
 </body>
 </html>
